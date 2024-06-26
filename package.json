@@ -27,9 +27,11 @@
     "typescript": "^5.5.2"
   },
   "dependencies": {
+    "ah-logger": "^3.2.8",
     "clipper2-wasm": "^0.1.0",
     "earcut": "^2.2.4",
     "numeric": "^1.2.6",
+    "opencascade.js": "2.0.0-beta.b5ff984",
     "three": "^0.165.0"
   }
 }

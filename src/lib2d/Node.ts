@@ -11,7 +11,7 @@ import { Hierarchy } from '../Hierarchy';
  *
  * - Node 会引入 local 坐标系，它的 position、rotation、scaling 属性表示相对于上级（现在是世界）坐标系的变换。
  */
-export class Node<T extends Curve | Face | null = any, D = any> extends Hierarchy {
+export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> extends Hierarchy {
   constructor(
     public primitive: T,
     public position = new Vector2(),

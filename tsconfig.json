@@ -8,7 +8,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "lib": ["es2022", "dom"]
+    "lib": ["es2022", "dom", "esnext"]
   },
   "include": ["src", "__test__"]
 }
