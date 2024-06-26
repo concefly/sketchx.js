@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vector2, Vec2 } from 'three';
 import { BaseAlgo } from './BaseAlgo';
 import { Line } from '../Line';
 import * as nc from 'numeric';
@@ -19,7 +19,7 @@ export class FittingAlgo extends BaseAlgo {
   /**
    * 二维点集拟合直线
    */
-  static fitLine(pnts: Vector2[]): Line {
+  static fitLine(pnts: Vec2[]): Line {
     const len = pnts.length;
     if (len < 2) throw new Error('at least 2 points required');
 
@@ -58,12 +58,12 @@ export class FittingAlgo extends BaseAlgo {
 
     // 判断是否为垂直线
     if (vX < 1e-6) {
-      line = new Line(new Vector2(meanX, minY), new Vector2(meanX, maxY));
+      line = new Line({ x: meanX, y: minY }, { x: meanX, y: maxY });
     } else {
       // 最小二乘法拟合直线
       const m = (sumXY - len * meanX * meanY) / (sumXX - len * meanX * meanX);
       const c = meanY - m * meanX;
-      line = new Line(new Vector2(minX, m * minX + c), new Vector2(maxX, m * maxX + c));
+      line = new Line({ x: minX, y: m * minX + c }, { x: maxX, y: m * maxX + c });
     }
 
     return line;
@@ -72,7 +72,7 @@ export class FittingAlgo extends BaseAlgo {
   /**
    * 二维点集拟合圆
    */
-  static fitCircle(pnts: Vector2[]): Circle {
+  static fitCircle(pnts: Vec2[]): Circle {
     // 最小二乘法拟合圆
     const len = pnts.length;
 
@@ -101,13 +101,13 @@ export class FittingAlgo extends BaseAlgo {
     const cy = mx[1] / 2;
     const r = Math.sqrt(cx * cx + cy * cy + mx[2]);
 
-    return new Circle(new Vector2(cx, cy), r);
+    return new Circle({ x: cx, y: cy }, r);
   }
 
   /**
    * 二维点集拟合圆弧
    */
-  static fitArc(pnts: Vector2[]): Arc {
+  static fitArc(pnts: Vec2[]): Arc {
     const circle = FittingAlgo.fitCircle(pnts);
 
     const start = pnts[0];
@@ -134,12 +134,12 @@ export class FittingAlgo extends BaseAlgo {
    * @param pnts 二维点集
    * @param tolerance angle 容差值
    */
-  static split(pnts: Vector2[], tolerance: number): Vector2[][] {
+  static split(pnts: Vec2[], tolerance: number): Vec2[][] {
     const len = pnts.length;
     if (len < 3) return [pnts];
 
-    const results: Vector2[][] = [];
-    let seg: Vector2[] = [pnts[0]];
+    const results: Vec2[][] = [];
+    let seg: Vec2[] = [pnts[0]];
 
     const v0 = new Vector2();
     const v1 = new Vector2();
@@ -157,7 +157,7 @@ export class FittingAlgo extends BaseAlgo {
       if (angle > tolerance) {
         seg.push(p1);
         results.push(seg);
-        seg = [p1.clone()]; // p1 会被重复添加, 所以要 clone, 避免多次引用造成的问题
+        seg = [new Vector2(p1.x, p1.y)];
       } else {
         seg.push(p1);
       }
@@ -170,7 +170,7 @@ export class FittingAlgo extends BaseAlgo {
   }
 
   constructor(
-    public pnts: Vector2[],
+    public pnts: Vec2[],
     public splitAngleTolerance: number = Math.PI / 90
   ) {
     super();
@@ -190,7 +190,7 @@ export class FittingAlgo extends BaseAlgo {
         if (rule.target === 'line' && pnts.length >= rule.minPntCnt) curve = FittingAlgo.fitLine(pnts);
         else if (rule.target === 'arc' && pnts.length >= rule.minPntCnt) curve = FittingAlgo.fitArc(pnts);
         else if (rule.target === 'circle' && pnts.length >= rule.minPntCnt) curve = FittingAlgo.fitCircle(pnts);
-        else curve = new Line(pnts[0].clone(), pnts[pnts.length - 1].clone());
+        else curve = new Line({ x: pnts[0].x, y: pnts[0].y }, { x: pnts[pnts.length - 1].x, y: pnts[pnts.length - 1].y });
 
         const variance = calcVariance(pnts, curve);
         curveInfos.push({ curve, variance });
@@ -212,20 +212,26 @@ export class FittingAlgo extends BaseAlgo {
 }
 
 /** 求点集方差 */
-function calcVariance(pnts: Vector2[], curve: Curve) {
+function calcVariance(pnts: Vec2[], curve: Curve) {
   let lenSum = 0;
   const pntOnCurve = new Vector2();
 
   let variance = 0;
 
   // 逐点计算距离
-  variance += pnts[0].distanceTo(curve.pointAt(0, pntOnCurve)) ** 2;
+  variance += new Vector2(pnts[0].x, pnts[0].y).distanceTo(curve.pointAt(0, pntOnCurve)) ** 2;
+
+  const _vec0 = new Vector2();
+  const _vect = new Vector2();
 
   for (let i = 1; i < pnts.length; i++) {
     const p0 = pnts[i - 1];
     const pt = pnts[i];
 
-    lenSum += pt.distanceTo(p0);
+    _vec0.copy(p0);
+    _vect.copy(pt);
+
+    lenSum += _vect.distanceTo(_vec0);
 
     curve.pointAt(lenSum, pntOnCurve);
     const dis = pntOnCurve.distanceTo(pt);

@@ -1,20 +1,21 @@
-import { Matrix3, Vector2 } from 'three';
+import { Matrix3, Vec2, Vector2, Vector3 } from 'three';
 import { Curve } from './Curve';
 import { TMP_VEC2 } from './TmpVec';
 import { ICurveCircleData } from './2d.type';
+import { VecUtil } from '../VecUtil';
 
 export class Circle extends Curve {
   constructor(
-    public center: Vector2,
+    public center: Vec2,
     public radius: number
   ) {
     super();
   }
 
-  nearestPoint(pnt: Vector2): number {
+  nearestPoint(pnt: Vec2): number {
     const center = this.center;
     const radius = this.radius;
-    const angle = pnt.clone().sub(center).angle();
+    const angle = new Vector2().copy(pnt).sub(center).angle();
     const len = angle * radius;
     return len;
   }
@@ -31,30 +32,34 @@ export class Circle extends Curve {
     return true;
   }
 
-  pointAt(len: number, ref: Vector2): Vector2 {
+  pointAt(len: number, ref: Vec2): Vec2 {
     const t = len / this.length;
     const angle = Math.PI * 2 * t;
     const x = this.center.x + this.radius * Math.cos(angle);
     const y = this.center.y + this.radius * Math.sin(angle);
-    return ref.set(x, y);
+    ref.x = x;
+    ref.y = y;
+    return ref;
   }
 
-  tangentAt(len: number, ref: Vector2): Vector2 {
+  tangentAt(len: number, ref: Vec2): Vec2 {
     const t = len / this.length;
     const angle = Math.PI * 2 * t;
     const x = -this.radius * Math.sin(angle);
     const y = this.radius * Math.cos(angle);
-    return ref.set(x, y);
+    ref.x = x;
+    ref.y = y;
+    return ref;
   }
 
-  toPolyline(): Vector2[] {
-    if (this.radius === 0) return [this.center.clone()];
+  toPolyline(): Vec2[] {
+    if (this.radius === 0) return [{ ...this.center }];
 
-    const points: Vector2[] = [];
+    const points: Vec2[] = [];
     const len = this.length;
 
     for (let i = 0; i <= 360; i++) {
-      const p = this.pointAt((i / 360) * len, new Vector2());
+      const p = this.pointAt((i / 360) * len, { x: 0, y: 0 });
       points.push(p);
     }
 
@@ -62,11 +67,11 @@ export class Circle extends Curve {
   }
 
   clone() {
-    return new Circle(this.center.clone(), this.radius);
+    return new Circle({ ...this.center }, this.radius);
   }
 
   applyMatrix(matrix: Matrix3): void {
-    this.center.applyMatrix3(matrix);
+    VecUtil.applyMatrix3(this.center, matrix, this.center);
   }
 
   toJSON(): ICurveCircleData {
@@ -78,22 +83,24 @@ export class Circle extends Curve {
   }
 
   fromJSON(data: ICurveCircleData) {
-    this.center.set(data.center[0], data.center[1]);
+    this.center.x = data.center[0];
+    this.center.y = data.center[1];
+
     this.radius = data.radius;
     return this;
   }
 
-  lengthAt(pnt: Vector2): number {
+  lengthAt(pnt: Vec2): number {
     const center = this.center;
     const radius = this.radius;
-    const angle = pnt.clone().sub(center).angle();
+    const angle = new Vector2().copy(pnt).sub(center).angle();
     const len = angle * radius;
     return len;
   }
 
-  vertices(): Vector2[] {
+  vertices(): Vec2[] {
     // 返回 0 度点
-    return [this.pointAt(0, new Vector2())];
+    return [this.pointAt(0, { x: 0, y: 0 })];
   }
 
   reverse() {

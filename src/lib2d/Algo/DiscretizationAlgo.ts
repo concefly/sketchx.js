@@ -1,10 +1,10 @@
-import { Vector2 } from 'three';
+import { Vector2, Vec2 } from 'three';
 import { BaseAlgo } from './BaseAlgo';
 import { Curve } from '../Curve';
 
 /** 离散化算法 */
 export class DiscretizationAlgo extends BaseAlgo {
-  private _rst: Vector2[] = [];
+  private _rst: Vec2[] = [];
 
   constructor(
     public curve: Curve,
@@ -32,7 +32,7 @@ export class DiscretizationAlgo extends BaseAlgo {
       const p1 = curve.pointAt(t1, new Vector2());
 
       // 两点重合, 直接返回
-      if (p0.equals(p1)) return;
+      if (p0.x === p1.x && p0.y === p1.y) return;
 
       // 曲线终点切线
       const t1t = curve.tangentAt(t1, new Vector2());
@@ -44,11 +44,11 @@ export class DiscretizationAlgo extends BaseAlgo {
       // 两点的中点
       const p01m = new Vector2((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
       // 两点的向量
-      const p01t = p1.clone().sub(p0).normalize();
+      const p01t = new Vector2(p1.x, p1.y).sub(p0).normalize();
 
       // 弦高 + 弦角
-      const distance = pm.distanceTo(p01m);
-      const angle = Math.abs(t1t.angleTo(p01t));
+      const distance = new Vector2(pm.x, pm.y).distanceTo(p01m);
+      const angle = Math.abs(new Vector2(t1t.x, t1t.y).angleTo(p01t));
 
       const linearDelta = distance - linearDeflection;
       const angularDelta = angle - angularDeflection;

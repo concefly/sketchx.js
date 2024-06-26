@@ -1,4 +1,4 @@
-import { Matrix3, Vector2 } from 'three';
+import { Matrix3, Vec2 } from 'three';
 import { Curve } from './Curve';
 import earcut from 'earcut';
 import { IFaceData } from './2d.type';
@@ -33,9 +33,9 @@ export class Face {
 
     const indices = earcut(_fVertices, holeIndices);
 
-    const vertices: Vector2[] = [];
+    const vertices: Vec2[] = [];
     for (let i = 0; i < _fVertices.length; i += 2) {
-      vertices.push(new Vector2(_fVertices[i], _fVertices[i + 1]));
+      vertices.push({ x: _fVertices[i], y: _fVertices[i + 1] });
     }
 
     return { vertices, indices };
@@ -57,7 +57,7 @@ export class Face {
   }
 
   vertices() {
-    const vertices: Vector2[] = [];
+    const vertices: Vec2[] = [];
 
     vertices.push(...this.outline.vertices());
 
@@ -69,7 +69,7 @@ export class Face {
   }
 
   verticesExtend() {
-    const list: { p: Vector2; type: 'outline' | 'hole'; index: number; curve: Curve }[] = [];
+    const list: { p: Vec2; type: 'outline' | 'hole'; index: number; curve: Curve }[] = [];
 
     list.push(...this.outline.vertices().map(p => ({ p, type: 'outline' as const, index: 0, curve: this.outline })));
 

@@ -1,6 +1,8 @@
 import { Vector2 } from 'three';
-import { Arc, Line, LineExpanseAlgo, Wire } from '../../../src/lib2d';
 import { _descWire } from '../util';
+import { Wire } from '../../../src/lib2d/Wire';
+import { Line } from '../../../src/lib2d/Line';
+import { LineExpanseAlgo } from '../../../src/lib2d/Algo/LineExpanseAlgo';
 
 describe('LineExpanseAlgo', () => {
   it('zero scale line - butt', () => {

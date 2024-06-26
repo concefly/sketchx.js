@@ -1,10 +1,11 @@
-import { Vector2, Matrix3, Vector3 } from 'three';
+import { Vec2, Matrix3, Vector3 } from 'three';
 import { INodeData } from './2d.type';
 import { Curve } from './Curve';
 import { Parser } from './Parser';
 import { Face } from './Face';
 import { randomID } from '../randomID';
 import { Hierarchy } from '../Hierarchy';
+import { VecUtil } from '../VecUtil';
 
 /**
  * Node 类表示一个节点，它包含一个 primitive 对象，primitive 可以是 Curve 或 Face。
@@ -14,9 +15,9 @@ import { Hierarchy } from '../Hierarchy';
 export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> extends Hierarchy {
   constructor(
     public primitive: T,
-    public position = new Vector2(),
+    public position = { x: 0, y: 0 },
     public rotation = 0,
-    public scaling = new Vector2(1, 1)
+    public scaling = { x: 1, y: 1 }
   ) {
     super();
   }
@@ -29,17 +30,21 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
 
   /** 对齐到指定姿态，并保持 primitive 世界位姿不变 */
   alineTo(node: Node): this;
-  alineTo(position: Vector2, rotation?: number, scaling?: Vector2): this;
-  alineTo(posOrNode: Node | Vector2, rotation?: number, scaling?: Vector2) {
+  alineTo(position: Vec2, rotation?: number, scaling?: Vec2): this;
+  alineTo(posOrNode: Node | Vec2, rotation?: number, scaling?: Vec2) {
     if (posOrNode instanceof Node) return this.alineTo(posOrNode.position, posOrNode.rotation, posOrNode.scaling);
 
     const position = posOrNode;
     rotation = rotation ?? 0;
-    scaling = scaling ?? new Vector2(1, 1);
+    scaling = scaling ?? { x: 1, y: 1 };
 
-    this.position.copy(position);
+    this.position.x = position.x;
+    this.position.y = position.y;
+
     this.rotation = rotation;
-    this.scaling.copy(scaling);
+
+    this.scaling.x = scaling.x;
+    this.scaling.y = scaling.y;
 
     // 逆变换
     if (this.primitive) {
@@ -61,9 +66,13 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     const m = this.worldMatrix();
     this.primitive?.applyMatrix(m);
 
-    this.position.set(0, 0);
+    this.position.x = 0;
+    this.position.y = 0;
+
     this.rotation = 0;
-    this.scaling.set(1, 1);
+
+    this.scaling.x = 1;
+    this.scaling.y = 1;
 
     return this;
   }
@@ -104,21 +113,22 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     return m;
   }
 
-  worldToLocal(pnt: Vector2): Vector2 {
+  worldToLocal(pnt: Vec2): Vec2 {
     const m = this.worldMatrix().clone().invert();
-    return pnt.clone().applyMatrix3(m);
+
+    return VecUtil.applyMatrix3(pnt, m, { x: 0, y: 0 });
   }
 
-  worldPosition(): Vector2 {
-    return new Vector2().applyMatrix3(this.worldMatrix());
+  worldPosition(): Vec2 {
+    return VecUtil.applyMatrix3({ x: 0, y: 0 }, this.worldMatrix(), { x: 0, y: 0 });
   }
 
-  localToWorld(pnt: Vector2): Vector2 {
-    return pnt.clone().applyMatrix3(this.worldMatrix());
+  localToWorld(pnt: Vec2): Vec2 {
+    return VecUtil.applyMatrix3(pnt, this.worldMatrix(), { x: 0, y: 0 });
   }
 
   clone(opt: { withParent?: boolean; noChildren?: boolean } = {}): this {
-    const cloned = new Node(this.primitive?.clone() || null, this.position.clone(), this.rotation, this.scaling.clone());
+    const cloned = new Node(this.primitive?.clone() || null, { ...this.position }, this.rotation, { ...this.scaling });
     cloned.userData = structuredClone(this.userData);
 
     if (opt.withParent) {
@@ -148,9 +158,14 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
   fromJSON(data: INodeData): this {
     this.id = data.id;
     this.primitive = (data.primitive ? Parser.parse(data.primitive) : null) as T;
-    this.position.set(data.position[0], data.position[1]);
+
+    this.position.x = data.position[0];
+    this.position.y = data.position[1];
+
     this.rotation = data.rotation;
-    this.scaling.set(data.scaling[0], data.scaling[1]);
+
+    this.scaling.x = data.scaling[0];
+    this.scaling.y = data.scaling[1];
 
     if (data.children) {
       this.add(data.children.map(Parser.parse) as any);

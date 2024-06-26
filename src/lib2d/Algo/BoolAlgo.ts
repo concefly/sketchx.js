@@ -2,7 +2,7 @@ import { BaseAlgo } from './BaseAlgo';
 import { Clipper2, PathD, PathsD } from '../../extension/clipper2';
 import { Face } from '../Face';
 import { Wire } from '../Wire';
-import { Vector2 } from 'three';
+import { Vec2 } from 'three';
 import { FittingAlgo } from './FittingAlgo';
 import { Curve } from '../Curve';
 import { ICurveData } from '../2d.type';
@@ -79,18 +79,18 @@ function _makePathsD(face: Face) {
 }
 
 // 这个会闭合
-function _makePolygonPnts(path: PathD): Vector2[] {
-  const list: Vector2[] = [];
+function _makePolygonPnts(path: PathD): Vec2[] {
+  const list: Vec2[] = [];
   const cnt = path.size();
 
   for (let i = 0; i < cnt; i++) {
     const p = path.get(i);
-    list.push(new Vector2(p.x, p.y));
+    list.push(p);
   }
 
   // close: path 读取出来的点是开放的，需要手动闭合
   const p = path.get(0);
-  list.push(new Vector2(p.x, p.y));
+  list.push(p);
 
   return list;
 }

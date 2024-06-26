@@ -1,9 +1,10 @@
-import { Matrix3, Vector2 } from 'three';
+import { Matrix3, Vec2 } from 'three';
 import { Curve } from './Curve';
 import { ICurveData, ICurveWireData } from './2d.type';
 import { Parser } from './Parser';
 import { Line } from './Line';
 import { TMP_VEC2 } from './TmpVec';
+import { VecUtil } from '../VecUtil';
 
 /**
  * A wire is a sequence of curves.
@@ -39,14 +40,11 @@ export class Wire extends Curve {
     return len;
   }
 
-  get geoCenter(): Vector2 {
-    const center = new Vector2();
-
-    for (const curve of this.curves) {
-      center.add(curve.geoCenter);
-    }
-
-    return center.divideScalar(this.curves.length);
+  get geoCenter(): Vec2 {
+    return VecUtil.center(
+      this.curves.map(c => c.geoCenter),
+      { x: 0, y: 0 }
+    );
   }
 
   isClosed(): boolean {
@@ -55,10 +53,10 @@ export class Wire extends Curve {
     const cStart = this.curves[0];
     const cEnd = this.curves[this.curves.length - 1];
 
-    const pTail = cEnd.pointAt(cEnd.length, new Vector2());
-    const pHead = cStart.pointAt(0, new Vector2());
+    const pTail = cEnd.pointAt(cEnd.length, { x: 0, y: 0 });
+    const pHead = cStart.pointAt(0, { x: 0, y: 0 });
 
-    return pTail.equals(pHead);
+    return VecUtil.equals(pTail, pHead);
   }
 
   close() {
@@ -67,16 +65,16 @@ export class Wire extends Curve {
     const cStart = this.curves[0];
     const cEnd = this.curves[this.curves.length - 1];
 
-    const pTail = cEnd.pointAt(cEnd.length, new Vector2());
-    const pHead = cStart.pointAt(0, new Vector2());
+    const pTail = cEnd.pointAt(cEnd.length, { x: 0, y: 0 });
+    const pHead = cStart.pointAt(0, { x: 0, y: 0 });
 
-    if (!pTail.equals(pHead)) {
+    if (!VecUtil.equals(pTail, pHead)) {
       const line = new Line(pTail, pHead);
       this.curves.push(line);
     }
   }
 
-  nearestPoint(pnt: Vector2): number {
+  nearestPoint(pnt: Vec2): number {
     let min = Infinity;
 
     for (const curve of this.curves) {
@@ -87,12 +85,12 @@ export class Wire extends Curve {
     return min;
   }
 
-  pointAt(len: number, ref: Vector2): Vector2 {
+  pointAt(len: number, ref: Vec2): Vec2 {
     const [curve, t] = this._curveAt(len);
     return curve.pointAt(t, ref);
   }
 
-  tangentAt(len: number, ref: Vector2): Vector2 {
+  tangentAt(len: number, ref: Vec2): Vec2 {
     const [curve, t] = this._curveAt(len);
     return curve.tangentAt(t, ref);
   }
@@ -107,8 +105,8 @@ export class Wire extends Curve {
     }
   }
 
-  toPolyline(): Vector2[] {
-    const points: Vector2[] = [];
+  toPolyline(): Vec2[] {
+    const points: Vec2[] = [];
 
     for (let i = 0; i < this.curves.length; i++) {
       const curve = this.curves[i];
@@ -140,21 +138,21 @@ export class Wire extends Curve {
     return this;
   }
 
-  fromPolyline(points: Vector2[], close = false) {
+  fromPolyline(points: Vec2[], close = false) {
     this.curves.length = 0;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i].clone();
-      const p1 = points[i + 1].clone();
+      const p0 = { ...points[i] };
+      const p1 = { ...points[i + 1] };
       const line = new Line(p0, p1);
       this.curves.push(line);
     }
 
     if (close) {
-      const p0 = points[points.length - 1].clone();
-      const p1 = points[0].clone();
+      const p0 = { ...points[points.length - 1] };
+      const p1 = { ...points[0] };
 
-      if (!p0.equals(p1)) {
+      if (!VecUtil.equals(p0, p1)) {
         const line = new Line(p0, p1);
         this.curves.push(line);
       }
@@ -164,7 +162,7 @@ export class Wire extends Curve {
   }
 
   /** 查找曲线 */
-  findCurveByPnt(pnt: Vector2): { curve: Curve; len: number }[] {
+  findCurveByPnt(pnt: Vec2): { curve: Curve; len: number }[] {
     const result: { curve: Curve; len: number }[] = [];
 
     let len = 0;
@@ -182,7 +180,7 @@ export class Wire extends Curve {
     return result;
   }
 
-  lengthAt(pnt: Vector2): number | null {
+  lengthAt(pnt: Vec2): number | null {
     let len = 0;
 
     for (const curve of this.curves) {
@@ -199,10 +197,10 @@ export class Wire extends Curve {
   }
 
   vertices() {
-    const list: Vector2[] = [];
+    const list: Vec2[] = [];
 
     for (const curve of this.curves) {
-      list.push(curve.pointAt(0, new Vector2()));
+      list.push(curve.pointAt(0, { x: 0, y: 0 }));
     }
 
     return list;

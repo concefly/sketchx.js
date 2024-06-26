@@ -6,13 +6,13 @@ describe('Node', () => {
   it('applyTransform', () => {
     const node = new Node(new Line(new Vector2(0, 0), new Vector2(1, 0)));
 
-    node.position.set(1, 1);
+    node.position = { x: 1, y: 1 };
     node.rotation = Math.PI / 2;
-    node.scaling.set(2, 2);
+    node.scaling = { x: 2, y: 2 };
 
-    const oldPos = node.position.clone();
+    const oldPos = { ...node.position };
     const oldRot = node.rotation;
-    const oldSca = node.scaling.clone();
+    const oldSca = { ...node.scaling };
 
     node.applyTransform();
 
@@ -45,9 +45,9 @@ describe('Node', () => {
   it('matrix', () => {
     const node = new Node(new Line(new Vector2(0, 0), new Vector2(1, 0)));
 
-    node.position.set(1, 1);
+    node.position = { x: 1, y: 1 };
     node.rotation = Math.PI / 2;
-    node.scaling.set(2, 2);
+    node.scaling = { x: 2, y: 2 };
 
     const m = node.matrix();
 

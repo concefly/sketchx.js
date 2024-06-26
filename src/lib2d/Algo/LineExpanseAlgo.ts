@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vector2, Vec2 } from 'three';
 import { Line } from '../Line';
 import { Wire } from '../Wire';
 import { BaseAlgo } from './BaseAlgo';
@@ -58,7 +58,7 @@ export class LineExpanseAlgo extends BaseAlgo {
           const t0 = c0.tangentAt(c0.length, new Vector2());
           const t1 = c1.tangentAt(0, new Vector2());
 
-          const cross = t0.cross(t1);
+          const cross = new Vector2().copy(t0).cross(t1);
           const direction = cross > 0 ? 1 : cross < 0 ? -1 : 0;
 
           // 平行
@@ -70,30 +70,30 @@ export class LineExpanseAlgo extends BaseAlgo {
 
             // 理论上不会出现无交点的情况，如果出现了，直接线段连接
             if (istA.length === 0) {
-              const linkLine = new Line(ca0.p1.clone(), ca1.p0.clone());
+              const linkLine = new Line({ ...ca0.p1 }, { ...ca1.p0 });
               mutateCurvesA.splice(i + 1, 0, linkLine);
             }
 
             if (istB.length === 0) {
-              const linkLine = new Line(cb0.p1.clone(), cb1.p0.clone());
+              const linkLine = new Line({ ...cb0.p1 }, { ...cb1.p0 });
               mutateCurvesB.splice(i + 1, 0, linkLine);
             }
 
             if (istA.length > 0 && istB.length > 0) {
               // 顺时针: A 侧相交，B 侧相离
               if (direction === -1) {
-                ca0.p1.copy(istA[0]);
-                ca1.p0.copy(istA[0]);
-                cb0.p1.copy(istB[0]);
-                cb1.p0.copy(istB[0]);
+                ca0.p1 = { ...istA[0] };
+                ca1.p0 = { ...istA[0] };
+                cb0.p1 = { ...istB[0] };
+                cb1.p0 = { ...istB[0] };
               }
 
               // 逆时针: A 侧相离，B 侧相交
               else {
-                ca0.p1.copy(istA[0]);
-                ca1.p0.copy(istA[0]);
-                cb0.p1.copy(istB[0]);
-                cb1.p0.copy(istB[0]);
+                ca0.p1 = { ...istA[0] };
+                ca1.p0 = { ...istA[0] };
+                cb0.p1 = { ...istB[0] };
+                cb1.p0 = { ...istB[0] };
               }
             }
           }

@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vector2, Vec2 } from 'three';
 import { Curve } from '../Curve';
 import { Line } from '../Line';
 import { BaseAlgo } from './BaseAlgo';
@@ -22,8 +22,8 @@ export class TrimAlgo extends BaseAlgo {
       const p0 = curve.pointAt(start, new Vector2());
       const p1 = curve.pointAt(end, new Vector2());
 
-      curve.p0.copy(p0);
-      curve.p1.copy(p1);
+      curve.p0 = p0;
+      curve.p1 = p1;
     }
 
     return curve;

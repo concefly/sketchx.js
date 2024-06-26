@@ -1,4 +1,4 @@
-import { Matrix3, Vector2 } from 'three';
+import { Matrix3, Vec2 } from 'three';
 import { ICurveData } from './2d.type';
 
 export abstract class Curve {
@@ -6,21 +6,21 @@ export abstract class Curve {
   abstract get length(): number;
 
   /** 曲线中心 */
-  abstract get geoCenter(): Vector2;
+  abstract get geoCenter(): Vec2;
 
   /** 曲线是否闭合 */
   abstract isClosed(): boolean;
 
   /** 求最近点 */
-  abstract nearestPoint(pnt: Vector2): number;
+  abstract nearestPoint(pnt: Vec2): number;
 
   /** 曲线上的点 */
-  abstract pointAt(len: number, ref: Vector2): Vector2;
+  abstract pointAt(len: number, ref: Vec2): Vec2;
 
   /** 曲线上的切线 */
-  abstract tangentAt(len: number, ref: Vector2): Vector2;
+  abstract tangentAt(len: number, ref: Vec2): Vec2;
 
-  abstract lengthAt(pnt: Vector2): number | null;
+  abstract lengthAt(pnt: Vec2): number | null;
 
   abstract clone(): Curve;
   abstract applyMatrix(matrix: Matrix3): void;
@@ -35,6 +35,6 @@ export abstract class Curve {
   abstract reverse(): this;
 
   /** 拟合成 polyline */
-  abstract toPolyline(): Vector2[];
-  abstract vertices(): Vector2[];
+  abstract toPolyline(): Vec2[];
+  abstract vertices(): Vec2[];
 }

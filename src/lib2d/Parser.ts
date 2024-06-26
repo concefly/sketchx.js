@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vec2 } from 'three';
 import { ICurveData, IFaceData, INodeData } from './2d.type';
 import { Arc } from './Arc';
 import { Circle } from './Circle';
@@ -28,10 +28,10 @@ export class Parser {
 
   static parseCurve = (data: ICurveData): _TypeMap[ICurveData['type']] => {
     const _callMap: { [T in ICurveData['type']]: (data: Extract<ICurveData, { type: T }>) => Curve } = {
-      line: data => new Line(new Vector2(), new Vector2()).fromJSON(data),
-      circle: data => new Circle(new Vector2(), 0).fromJSON(data),
+      line: data => new Line({ x: 0, y: 0 }, { x: 0, y: 0 }).fromJSON(data),
+      circle: data => new Circle({ x: 0, y: 0 }, 0).fromJSON(data),
       wire: data => new Wire([]).fromJSON(data),
-      arc: data => new Arc(new Vector2(), new Vector2(), 0).fromJSON(data),
+      arc: data => new Arc({ x: 0, y: 0 }, { x: 0, y: 0 }, 0).fromJSON(data),
     };
 
     // @ts-expect-error

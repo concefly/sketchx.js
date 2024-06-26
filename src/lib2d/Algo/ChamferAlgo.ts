@@ -1,4 +1,4 @@
-import { Vector2 } from 'three';
+import { Vector2, Vec2 } from 'three';
 import { Curve } from '../Curve';
 import { Wire } from '../Wire';
 import { BaseAlgo } from './BaseAlgo';
@@ -16,7 +16,7 @@ import { Face } from '../Face';
 export class ChamferAlgo<T extends Wire | Face> extends BaseAlgo {
   constructor(
     public target: T,
-    public pnts: Vector2[],
+    public pnts: Vec2[],
     public d0: number,
     public d1: number
   ) {
