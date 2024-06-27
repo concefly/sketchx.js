@@ -2,10 +2,10 @@ import { BaseAlgo } from './BaseAlgo';
 import { Clipper2, PathD, PathsD } from '../../extension/clipper2';
 import { Face } from '../Face';
 import { Wire } from '../Wire';
-import { Vec2 } from 'three';
 import { FittingAlgo } from './FittingAlgo';
 import { Curve } from '../Curve';
 import { ICurveData } from '../2d.type';
+import { IVec2 } from '../../typing';
 
 export class BoolAlgo extends BaseAlgo {
   constructor(
@@ -63,14 +63,14 @@ function _makePathsD(face: Face) {
 
   // outline
   const outlinePnts: number[] = [];
-  for (const p of face.outline.toPolyline()) outlinePnts.push(p.x, p.y);
+  for (const p of face.outline.toPolyline()) outlinePnts.push(p[0], p[1]);
 
   pathsD.push_back(Clipper2.MakePathD(outlinePnts));
 
   // holes
   for (const hole of face.holes) {
     const holePnts: number[] = [];
-    for (const p of hole.toPolyline()) holePnts.push(p.x, p.y);
+    for (const p of hole.toPolyline()) holePnts.push(p[0], p[1]);
 
     pathsD.push_back(Clipper2.MakePathD(holePnts));
   }
@@ -79,18 +79,18 @@ function _makePathsD(face: Face) {
 }
 
 // 这个会闭合
-function _makePolygonPnts(path: PathD): Vec2[] {
-  const list: Vec2[] = [];
+function _makePolygonPnts(path: PathD): IVec2[] {
+  const list: IVec2[] = [];
   const cnt = path.size();
 
   for (let i = 0; i < cnt; i++) {
     const p = path.get(i);
-    list.push(p);
+    list.push([p.x, p.y]);
   }
 
   // close: path 读取出来的点是开放的，需要手动闭合
   const p = path.get(0);
-  list.push(p);
+  list.push([p.x, p.y]);
 
   return list;
 }

@@ -1,4 +1,3 @@
-import { Vector2, Vec2 } from 'three';
 import { Curve } from '../Curve';
 import { Wire } from '../Wire';
 import { BaseAlgo } from './BaseAlgo';
@@ -6,6 +5,7 @@ import { IntersectAlgo } from './IntersectAlgo';
 import { Line } from '../Line';
 import { TrimAlgo } from './TrimAlgo';
 import { Face } from '../Face';
+import { IVec2 } from '../../typing';
 
 /** 倒角算法
  * @param wire 线框
@@ -16,7 +16,7 @@ import { Face } from '../Face';
 export class ChamferAlgo<T extends Wire | Face> extends BaseAlgo {
   constructor(
     public target: T,
-    public pnts: Vec2[],
+    public pnts: IVec2[],
     public d0: number,
     public d1: number
   ) {
@@ -54,8 +54,8 @@ export class ChamferAlgo<T extends Wire | Face> extends BaseAlgo {
 
       if (t0c < 0 || t0c > c0.length || t1c < 0 || t1c > c1.length) return null;
 
-      const p0 = c0.pointAt(t0c, new Vector2());
-      const p1 = c1.pointAt(t1c, new Vector2());
+      const p0 = c0.pointAt(t0c, []);
+      const p1 = c1.pointAt(t1c, []);
 
       // 3. 构建倒角线
       const cc = new Line(p0, p1);

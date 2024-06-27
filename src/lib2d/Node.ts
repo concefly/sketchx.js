@@ -1,4 +1,3 @@
-import { Vec2, Matrix3, Vector3 } from 'three';
 import { INodeData } from './2d.type';
 import { Curve } from './Curve';
 import { Parser } from './Parser';
@@ -6,6 +5,8 @@ import { Face } from './Face';
 import { randomID } from '../randomID';
 import { Hierarchy } from '../Hierarchy';
 import { VecUtil } from '../VecUtil';
+import { MatrixUtil } from '../MatrixUtil';
+import { IMat3, IVec2 } from '../typing';
 
 /**
  * Node 类表示一个节点，它包含一个 primitive 对象，primitive 可以是 Curve 或 Face。
@@ -15,9 +16,9 @@ import { VecUtil } from '../VecUtil';
 export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> extends Hierarchy {
   constructor(
     public primitive: T,
-    public position = { x: 0, y: 0 },
+    public position = [0, 0],
     public rotation = 0,
-    public scaling = { x: 1, y: 1 }
+    public scaling = [1, 1]
   ) {
     super();
   }
@@ -25,36 +26,33 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
   id = randomID();
   userData?: D;
 
-  private __localMatrix = new Matrix3();
-  private __worldMatrix = new Matrix3();
+  private __localMatrix = MatrixUtil.identify([]);
+  private __worldMatrix = MatrixUtil.identify([]);
 
   /** 对齐到指定姿态，并保持 primitive 世界位姿不变 */
   alineTo(node: Node): this;
-  alineTo(position: Vec2, rotation?: number, scaling?: Vec2): this;
-  alineTo(posOrNode: Node | Vec2, rotation?: number, scaling?: Vec2) {
+  alineTo(position: IVec2, rotation?: number, scaling?: IVec2): this;
+  alineTo(posOrNode: Node | IVec2, rotation?: number, scaling?: IVec2) {
     if (posOrNode instanceof Node) return this.alineTo(posOrNode.position, posOrNode.rotation, posOrNode.scaling);
 
     const position = posOrNode;
     rotation = rotation ?? 0;
-    scaling = scaling ?? { x: 1, y: 1 };
+    scaling = scaling ?? [1, 1];
 
-    this.position.x = position.x;
-    this.position.y = position.y;
+    this.position[0] = position[0];
+    this.position[1] = position[1];
 
     this.rotation = rotation;
 
-    this.scaling.x = scaling.x;
-    this.scaling.y = scaling.y;
+    this.scaling[0] = scaling[0];
+    this.scaling[1] = scaling[1];
 
     // 逆变换
     if (this.primitive) {
-      const mInv = new Matrix3();
+      const mInv = MatrixUtil.identify([]);
 
-      mInv.makeRotation(rotation);
-      mInv.scale(scaling.x, scaling.y);
-      mInv.translate(position.x, position.y);
-
-      mInv.invert();
+      MatrixUtil.compose(position, rotation, scaling, mInv);
+      MatrixUtil.invert(mInv, mInv);
 
       this.primitive.applyMatrix(mInv);
     }
@@ -66,13 +64,13 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     const m = this.worldMatrix();
     this.primitive?.applyMatrix(m);
 
-    this.position.x = 0;
-    this.position.y = 0;
+    this.position[0] = 0;
+    this.position[1] = 0;
 
     this.rotation = 0;
 
-    this.scaling.x = 1;
-    this.scaling.y = 1;
+    this.scaling[0] = 1;
+    this.scaling[1] = 1;
 
     return this;
   }
@@ -84,12 +82,8 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
    * @returns The transformation matrix.
    */
   matrix() {
-    const m = this.__localMatrix.identity();
-
-    m.makeRotation(this.rotation);
-    m.scale(this.scaling.x, this.scaling.y);
-    m.translate(this.position.x, this.position.y);
-
+    const m = MatrixUtil.identify(this.__localMatrix);
+    MatrixUtil.compose(this.position, this.rotation, this.scaling, m);
     return m;
   }
 
@@ -100,35 +94,52 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
    * @returns The world transformation matrix.
    */
   worldMatrix() {
-    this.__worldMatrix.copy(this.matrix());
+    MatrixUtil.copy(this.matrix(), this.__worldMatrix);
 
     const m = this.__worldMatrix;
     let node = this.parent;
 
     while (node) {
-      m.premultiply(node.matrix());
+      MatrixUtil.multiply(node.matrix(), m, m);
       node = node.parent;
     }
 
     return m;
   }
 
-  worldToLocal(pnt: Vec2): Vec2 {
-    const m = this.worldMatrix().clone().invert();
+  /**
+   * Sets the world pose of the node using the specified world matrix.
+   *
+   * @param worldMatrix - The world matrix representing the new pose of the node.
+   */
+  setWorldPose(worldMatrix: IMat3) {
+    const parentInv = MatrixUtil.identify([]);
+    MatrixUtil.invert(this.parent?.worldMatrix() || MatrixUtil.identify([]), parentInv);
 
-    return VecUtil.applyMatrix3(pnt, m, { x: 0, y: 0 });
+    const newLocal = MatrixUtil.multiply(parentInv, worldMatrix, []);
+
+    this.position = MatrixUtil.getTranslation(newLocal);
+    this.rotation = MatrixUtil.getRotation(newLocal);
+    this.scaling = MatrixUtil.getScaling(newLocal);
   }
 
-  worldPosition(): Vec2 {
-    return VecUtil.applyMatrix3({ x: 0, y: 0 }, this.worldMatrix(), { x: 0, y: 0 });
+  worldToLocal(pnt: IVec2): IVec2 {
+    const m = MatrixUtil.identify([]);
+    MatrixUtil.invert(this.worldMatrix(), m);
+
+    return VecUtil.applyMatrix(pnt, m, []);
   }
 
-  localToWorld(pnt: Vec2): Vec2 {
-    return VecUtil.applyMatrix3(pnt, this.worldMatrix(), { x: 0, y: 0 });
+  worldPosition(): IVec2 {
+    return VecUtil.applyMatrix([], this.worldMatrix(), []);
+  }
+
+  localToWorld(pnt: IVec2): IVec2 {
+    return VecUtil.applyMatrix(pnt, this.worldMatrix(), []);
   }
 
   clone(opt: { withParent?: boolean; noChildren?: boolean } = {}): this {
-    const cloned = new Node(this.primitive?.clone() || null, { ...this.position }, this.rotation, { ...this.scaling });
+    const cloned = new Node(this.primitive?.clone() || null, this.position.slice(), this.rotation, this.scaling.slice());
     cloned.userData = structuredClone(this.userData);
 
     if (opt.withParent) {
@@ -147,9 +158,9 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
       type: 'node',
       id: this.id,
       primitive: this.primitive?.toJSON(),
-      position: [this.position.x, this.position.y],
+      position: [...this.position],
       rotation: this.rotation,
-      scaling: [this.scaling.x, this.scaling.y],
+      scaling: [...this.scaling],
       children: this.children.map(child => child.toJSON()),
       userData: this.userData,
     };
@@ -159,13 +170,9 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     this.id = data.id;
     this.primitive = (data.primitive ? Parser.parse(data.primitive) : null) as T;
 
-    this.position.x = data.position[0];
-    this.position.y = data.position[1];
-
+    VecUtil.copy(data.position, this.position);
     this.rotation = data.rotation;
-
-    this.scaling.x = data.scaling[0];
-    this.scaling.y = data.scaling[1];
+    VecUtil.copy(data.scaling, this.scaling);
 
     if (data.children) {
       this.add(data.children.map(Parser.parse) as any);

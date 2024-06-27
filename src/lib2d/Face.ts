@@ -1,8 +1,8 @@
-import { Matrix3, Vec2 } from 'three';
 import { Curve } from './Curve';
 import earcut from 'earcut';
 import { IFaceData } from './2d.type';
 import { Parser } from './Parser';
+import { IMat3, IVec2 } from '../typing';
 
 export class Face {
   constructor(
@@ -15,7 +15,7 @@ export class Face {
 
     const outlinePoints = this.outline.toPolyline();
     for (const point of outlinePoints) {
-      _fVertices.push(point.x, point.y);
+      _fVertices.push(point[0], point[1]);
     }
 
     const holeIndices: number[] = [];
@@ -25,7 +25,7 @@ export class Face {
       const holeIndex = _fVertices.length / 2;
 
       for (const point of holePoints) {
-        _fVertices.push(point.x, point.y);
+        _fVertices.push(point[0], point[1]);
       }
 
       holeIndices.push(holeIndex);
@@ -33,9 +33,9 @@ export class Face {
 
     const indices = earcut(_fVertices, holeIndices);
 
-    const vertices: Vec2[] = [];
+    const vertices: IVec2[] = [];
     for (let i = 0; i < _fVertices.length; i += 2) {
-      vertices.push({ x: _fVertices[i], y: _fVertices[i + 1] });
+      vertices.push([_fVertices[i], _fVertices[i + 1]]);
     }
 
     return { vertices, indices };
@@ -57,7 +57,7 @@ export class Face {
   }
 
   vertices() {
-    const vertices: Vec2[] = [];
+    const vertices: IVec2[] = [];
 
     vertices.push(...this.outline.vertices());
 
@@ -69,7 +69,7 @@ export class Face {
   }
 
   verticesExtend() {
-    const list: { p: Vec2; type: 'outline' | 'hole'; index: number; curve: Curve }[] = [];
+    const list: { p: IVec2; type: 'outline' | 'hole'; index: number; curve: Curve }[] = [];
 
     list.push(...this.outline.vertices().map(p => ({ p, type: 'outline' as const, index: 0, curve: this.outline })));
 
@@ -88,7 +88,7 @@ export class Face {
     );
   }
 
-  applyMatrix(matrix: Matrix3) {
+  applyMatrix(matrix: IMat3) {
     this.outline.applyMatrix(matrix);
 
     for (const hole of this.holes) {

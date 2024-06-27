@@ -1,4 +1,3 @@
-import { Vector2 } from 'three';
 import { _descWire } from '../util';
 import { Wire } from '../../../src/lib2d/Wire';
 import { Line } from '../../../src/lib2d/Line';
@@ -6,7 +5,7 @@ import { LineExpanseAlgo } from '../../../src/lib2d/Algo/LineExpanseAlgo';
 
 describe('LineExpanseAlgo', () => {
   it('zero scale line - butt', () => {
-    const wire = new Wire([new Line(new Vector2(0, 0), new Vector2(0, 0))]);
+    const wire = new Wire([new Line([0, 0], [0, 0])]);
     new LineExpanseAlgo(wire, 2, 'butt').run();
 
     const desc = _descWire(wire);
@@ -14,7 +13,7 @@ describe('LineExpanseAlgo', () => {
   });
 
   it('1 line - butt', () => {
-    const wire = new Wire([new Line(new Vector2(0, 0), new Vector2(10, 0))]);
+    const wire = new Wire([new Line([0, 0], [10, 0])]);
     new LineExpanseAlgo(wire, 2, 'butt').run();
 
     const desc = _descWire(wire);
@@ -27,7 +26,7 @@ describe('LineExpanseAlgo', () => {
   });
 
   it('2 line - butt', () => {
-    const wire = new Wire([new Line(new Vector2(0, 0), new Vector2(10, 0)), new Line(new Vector2(10, 0), new Vector2(10, 10))]);
+    const wire = new Wire([new Line([0, 0], [10, 0]), new Line([10, 0], [10, 10])]);
     new LineExpanseAlgo(wire, 2, 'butt').run();
 
     const desc = _descWire(wire);
@@ -42,11 +41,7 @@ describe('LineExpanseAlgo', () => {
   });
 
   it('3 line - butt', () => {
-    const wire = new Wire([
-      new Line(new Vector2(0, -5), new Vector2(10, -5)),
-      new Line(new Vector2(10, -5), new Vector2(10, 5)),
-      new Line(new Vector2(10, 5), new Vector2(0, 5)),
-    ]);
+    const wire = new Wire([new Line([0, -5], [10, -5]), new Line([10, -5], [10, 5]), new Line([10, 5], [0, 5])]);
     new LineExpanseAlgo(wire, 4, 'butt').run();
 
     const desc = _descWire(wire);
@@ -65,7 +60,7 @@ describe('LineExpanseAlgo', () => {
   });
 
   it('1 line - round', () => {
-    const wire = new Wire([new Line(new Vector2(0, 0), new Vector2(10, 0))]);
+    const wire = new Wire([new Line([0, 0], [10, 0])]);
     new LineExpanseAlgo(wire, 2, 'round').run();
 
     const desc = _descWire(wire);

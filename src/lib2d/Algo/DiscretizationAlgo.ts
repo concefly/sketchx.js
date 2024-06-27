@@ -1,10 +1,11 @@
-import { Vector2, Vec2 } from 'three';
 import { BaseAlgo } from './BaseAlgo';
 import { Curve } from '../Curve';
+import { IVec2 } from '../../typing';
+import { VecUtil } from '../../VecUtil';
 
 /** 离散化算法 */
 export class DiscretizationAlgo extends BaseAlgo {
-  private _rst: Vec2[] = [];
+  private _rst: IVec2[] = [];
 
   constructor(
     public curve: Curve,
@@ -22,33 +23,37 @@ export class DiscretizationAlgo extends BaseAlgo {
 
     // 二分法，递归
     const recursive = (t0: number, t1: number, depth: number) => {
-      const p0 = curve.pointAt(t0, new Vector2());
+      const p0 = curve.pointAt(t0, []);
 
       if (depth > maxDepth) {
         this._rst.push(p0);
         return;
       }
 
-      const p1 = curve.pointAt(t1, new Vector2());
+      const p1 = curve.pointAt(t1, []);
 
       // 两点重合, 直接返回
-      if (p0.x === p1.x && p0.y === p1.y) return;
+      if (p0[0] === p1[0] && p0[1] === p1[1]) return;
 
       // 曲线终点切线
-      const t1t = curve.tangentAt(t1, new Vector2());
+      const t1t = curve.tangentAt(t1, []);
 
       // 曲线的中点
       const mid = (t0 + t1) / 2;
-      const pm = curve.pointAt((t0 + t1) / 2, new Vector2());
+      const pm = curve.pointAt((t0 + t1) / 2, []);
 
       // 两点的中点
-      const p01m = new Vector2((p0.x + p1.x) / 2, (p0.y + p1.y) / 2);
+      const po1m = VecUtil.center([p0, p1], []);
+
       // 两点的向量
-      const p01t = new Vector2(p1.x, p1.y).sub(p0).normalize();
+      // const p01t = new Vector2(p1.x, p1.y).sub(p0).normalize();
+      const p01t = VecUtil.sub(p1, p0, []);
+      VecUtil.normalize(p01t, p01t);
 
       // 弦高 + 弦角
-      const distance = new Vector2(pm.x, pm.y).distanceTo(p01m);
-      const angle = Math.abs(new Vector2(t1t.x, t1t.y).angleTo(p01t));
+      const distance = VecUtil.distanceTo(pm, po1m);
+
+      const angle = Math.abs(VecUtil.angle(t1t, p01t));
 
       const linearDelta = distance - linearDeflection;
       const angularDelta = angle - angularDeflection;
@@ -68,7 +73,7 @@ export class DiscretizationAlgo extends BaseAlgo {
     recursive(0, 1, 0);
 
     // 添加起点
-    this._rst.unshift(curve.pointAt(0, new Vector2()));
+    this._rst.unshift(curve.pointAt(0, []));
     return this._rst;
   }
 }

@@ -1,11 +1,12 @@
-import { Vector2, Vec2 } from 'three';
+import { VecUtil } from '../../VecUtil';
+import { IVec2 } from '../../typing';
 import { Curve } from '../Curve';
 import { Line } from '../Line';
 import { BaseAlgo } from './BaseAlgo';
 
 /** 曲线求交 */
 export class IntersectAlgo extends BaseAlgo {
-  static equationIntersect(c0: Curve, c1: Curve): Vec2[] {
+  static equationIntersect(c0: Curve, c1: Curve): IVec2[] {
     // line - line
     if (c0 instanceof Line && c1 instanceof Line) {
       // 直接通过一般式求交点
@@ -15,7 +16,7 @@ export class IntersectAlgo extends BaseAlgo {
       const x = (e0.b * e1.c - e0.c * e1.b) / (e0.a * e1.b - e0.b * e1.a);
       const y = (e0.c * e1.a - e0.a * e1.c) / (e0.a * e1.b - e0.b * e1.a);
 
-      return [{ x, y }];
+      return [[x, y]];
     }
 
     return [];
@@ -37,11 +38,12 @@ export class IntersectAlgo extends BaseAlgo {
       const { p0, p1 } = c1;
       const list: [len0: number, len1: number][] = [];
 
-      const v1 = new Vector2().copy(c0.p1).sub(c0.p0);
-      const v2 = new Vector2().copy(p1).sub(p0);
-      const v3 = new Vector2().copy(p0).sub(c0.p0);
-      const t = v3.cross(v2) / v1.cross(v2);
-      const s = v3.cross(v1) / v1.cross(v2);
+      const v1 = VecUtil.sub(c0.p1, c0.p0, []);
+      const v2 = VecUtil.sub(p1, p0, []);
+      const v3 = VecUtil.sub(p0, c0.p0, []);
+
+      const t = VecUtil.cross(v3, v2) / VecUtil.cross(v1, v2);
+      const s = VecUtil.cross(v3, v1) / VecUtil.cross(v1, v2);
 
       if (t >= 0 && t <= 1 && s >= 0 && s <= 1) {
         const len0 = c0.length * t;

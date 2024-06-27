@@ -1,9 +1,9 @@
-import { Vec2, Vector3 } from 'three';
+import { IVec2 } from '../typing';
 
 export const TMP_VEC2 = Array(10)
   .fill(0)
-  .map(() => ({ x: 0, y: 0 }) as Vec2);
+  .map(() => [0, 0] as IVec2);
 
 export const TMP_VEC3 = Array(10)
   .fill(0)
-  .map(() => new Vector3());
+  .map(() => [0, 0, 0]);

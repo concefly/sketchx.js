@@ -1,10 +1,10 @@
-import { Vector2, Vec2 } from 'three';
 import { Line } from '../Line';
 import { Wire } from '../Wire';
 import { BaseAlgo } from './BaseAlgo';
 import { Curve } from '../Curve';
 import { IntersectAlgo } from './IntersectAlgo';
 import { Arc } from '../Arc';
+import { VecUtil } from '../../VecUtil';
 
 /**
  * 线条扩展算法
@@ -55,10 +55,10 @@ export class LineExpanseAlgo extends BaseAlgo {
           const cb1 = mutateCurvesB[i + 1];
 
           // 判断前进方向: 逆时针 1 顺时针 -1 平行 0
-          const t0 = c0.tangentAt(c0.length, new Vector2());
-          const t1 = c1.tangentAt(0, new Vector2());
+          const t0 = c0.tangentAt(c0.length, []);
+          const t1 = c1.tangentAt(0, []);
 
-          const cross = new Vector2().copy(t0).cross(t1);
+          const cross = VecUtil.cross(t0, t1);
           const direction = cross > 0 ? 1 : cross < 0 ? -1 : 0;
 
           // 平行
@@ -70,30 +70,30 @@ export class LineExpanseAlgo extends BaseAlgo {
 
             // 理论上不会出现无交点的情况，如果出现了，直接线段连接
             if (istA.length === 0) {
-              const linkLine = new Line({ ...ca0.p1 }, { ...ca1.p0 });
+              const linkLine = new Line([...ca0.p1], [...ca1.p0]);
               mutateCurvesA.splice(i + 1, 0, linkLine);
             }
 
             if (istB.length === 0) {
-              const linkLine = new Line({ ...cb0.p1 }, { ...cb1.p0 });
+              const linkLine = new Line([...cb0.p1], [...cb1.p0]);
               mutateCurvesB.splice(i + 1, 0, linkLine);
             }
 
             if (istA.length > 0 && istB.length > 0) {
               // 顺时针: A 侧相交，B 侧相离
               if (direction === -1) {
-                ca0.p1 = { ...istA[0] };
-                ca1.p0 = { ...istA[0] };
-                cb0.p1 = { ...istB[0] };
-                cb1.p0 = { ...istB[0] };
+                ca0.p1 = [...istA[0]];
+                ca1.p0 = [...istA[0]];
+                cb0.p1 = [...istB[0]];
+                cb1.p0 = [...istB[0]];
               }
 
               // 逆时针: A 侧相离，B 侧相交
               else {
-                ca0.p1 = { ...istA[0] };
-                ca1.p0 = { ...istA[0] };
-                cb0.p1 = { ...istB[0] };
-                cb1.p0 = { ...istB[0] };
+                ca0.p1 = [...istA[0]];
+                ca1.p0 = [...istA[0]];
+                cb0.p1 = [...istB[0]];
+                cb1.p0 = [...istB[0]];
               }
             }
           }
@@ -108,10 +108,10 @@ export class LineExpanseAlgo extends BaseAlgo {
       let cap0: Curve | null = null;
       let cap1: Curve | null = null;
 
-      const aStartPnt = mutateCurvesA[0].pointAt(0, new Vector2());
-      const aEndPnt = mutateCurvesA.at(-1)!.pointAt(mutateCurvesA.at(-1)!.length, new Vector2());
-      const bStartPnt = mutateCurvesB[0].pointAt(0, new Vector2());
-      const bEndPnt = mutateCurvesB.at(-1)!.pointAt(mutateCurvesB.at(-1)!.length, new Vector2());
+      const aStartPnt = mutateCurvesA[0].pointAt(0, []);
+      const aEndPnt = mutateCurvesA.at(-1)!.pointAt(mutateCurvesA.at(-1)!.length, []);
+      const bStartPnt = mutateCurvesB[0].pointAt(0, []);
+      const bEndPnt = mutateCurvesB.at(-1)!.pointAt(mutateCurvesB.at(-1)!.length, []);
 
       // butt
       if (cap === 'butt') {

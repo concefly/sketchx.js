@@ -1,10 +1,10 @@
-import { Matrix3, Vec2 } from 'three';
 import { Curve } from './Curve';
 import { ICurveData, ICurveWireData } from './2d.type';
 import { Parser } from './Parser';
 import { Line } from './Line';
 import { TMP_VEC2 } from './TmpVec';
 import { VecUtil } from '../VecUtil';
+import { IMat3, IVec2 } from '../typing';
 
 /**
  * A wire is a sequence of curves.
@@ -40,10 +40,10 @@ export class Wire extends Curve {
     return len;
   }
 
-  get geoCenter(): Vec2 {
+  get geoCenter(): IVec2 {
     return VecUtil.center(
       this.curves.map(c => c.geoCenter),
-      { x: 0, y: 0 }
+      []
     );
   }
 
@@ -53,8 +53,8 @@ export class Wire extends Curve {
     const cStart = this.curves[0];
     const cEnd = this.curves[this.curves.length - 1];
 
-    const pTail = cEnd.pointAt(cEnd.length, { x: 0, y: 0 });
-    const pHead = cStart.pointAt(0, { x: 0, y: 0 });
+    const pTail = cEnd.pointAt(cEnd.length, []);
+    const pHead = cStart.pointAt(0, []);
 
     return VecUtil.equals(pTail, pHead);
   }
@@ -65,8 +65,8 @@ export class Wire extends Curve {
     const cStart = this.curves[0];
     const cEnd = this.curves[this.curves.length - 1];
 
-    const pTail = cEnd.pointAt(cEnd.length, { x: 0, y: 0 });
-    const pHead = cStart.pointAt(0, { x: 0, y: 0 });
+    const pTail = cEnd.pointAt(cEnd.length, []);
+    const pHead = cStart.pointAt(0, []);
 
     if (!VecUtil.equals(pTail, pHead)) {
       const line = new Line(pTail, pHead);
@@ -74,7 +74,7 @@ export class Wire extends Curve {
     }
   }
 
-  nearestPoint(pnt: Vec2): number {
+  nearestPoint(pnt: IVec2): number {
     let min = Infinity;
 
     for (const curve of this.curves) {
@@ -85,12 +85,12 @@ export class Wire extends Curve {
     return min;
   }
 
-  pointAt(len: number, ref: Vec2): Vec2 {
+  pointAt(len: number, ref: IVec2): IVec2 {
     const [curve, t] = this._curveAt(len);
     return curve.pointAt(t, ref);
   }
 
-  tangentAt(len: number, ref: Vec2): Vec2 {
+  tangentAt(len: number, ref: IVec2): IVec2 {
     const [curve, t] = this._curveAt(len);
     return curve.tangentAt(t, ref);
   }
@@ -99,14 +99,14 @@ export class Wire extends Curve {
     return new Wire(this.curves.map(c => c.clone()));
   }
 
-  applyMatrix(matrix: Matrix3): void {
+  applyMatrix(matrix: IMat3): void {
     for (const curve of this.curves) {
       curve.applyMatrix(matrix);
     }
   }
 
-  toPolyline(): Vec2[] {
-    const points: Vec2[] = [];
+  toPolyline(): IVec2[] {
+    const points: IVec2[] = [];
 
     for (let i = 0; i < this.curves.length; i++) {
       const curve = this.curves[i];
@@ -138,19 +138,19 @@ export class Wire extends Curve {
     return this;
   }
 
-  fromPolyline(points: Vec2[], close = false) {
+  fromPolyline(points: IVec2[], close = false) {
     this.curves.length = 0;
 
     for (let i = 0; i < points.length - 1; i++) {
-      const p0 = { ...points[i] };
-      const p1 = { ...points[i + 1] };
+      const p0 = [...points[i]];
+      const p1 = [...points[i + 1]];
       const line = new Line(p0, p1);
       this.curves.push(line);
     }
 
     if (close) {
-      const p0 = { ...points[points.length - 1] };
-      const p1 = { ...points[0] };
+      const p0 = [...points[points.length - 1]];
+      const p1 = [...points[0]];
 
       if (!VecUtil.equals(p0, p1)) {
         const line = new Line(p0, p1);
@@ -162,7 +162,7 @@ export class Wire extends Curve {
   }
 
   /** 查找曲线 */
-  findCurveByPnt(pnt: Vec2): { curve: Curve; len: number }[] {
+  findCurveByPnt(pnt: IVec2): { curve: Curve; len: number }[] {
     const result: { curve: Curve; len: number }[] = [];
 
     let len = 0;
@@ -180,7 +180,7 @@ export class Wire extends Curve {
     return result;
   }
 
-  lengthAt(pnt: Vec2): number | null {
+  lengthAt(pnt: IVec2): number | null {
     let len = 0;
 
     for (const curve of this.curves) {
@@ -197,10 +197,10 @@ export class Wire extends Curve {
   }
 
   vertices() {
-    const list: Vec2[] = [];
+    const list: IVec2[] = [];
 
     for (const curve of this.curves) {
-      list.push(curve.pointAt(0, { x: 0, y: 0 }));
+      list.push(curve.pointAt(0, []));
     }
 
     return list;
