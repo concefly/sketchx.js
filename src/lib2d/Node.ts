@@ -60,17 +60,15 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     return this;
   }
 
+  /**
+   * Applies the transformation to the node.
+   * This method calculates the world matrix, **removes the node from its parent**
+   */
   applyTransform() {
     const m = this.worldMatrix();
-    this.primitive?.applyMatrix(m);
 
-    this.position[0] = 0;
-    this.position[1] = 0;
-
-    this.rotation = 0;
-
-    this.scaling[0] = 1;
-    this.scaling[1] = 1;
+    this.removeFormParent();
+    this.setWorldPose(m);
 
     return this;
   }
