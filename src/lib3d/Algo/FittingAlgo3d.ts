@@ -1,14 +1,19 @@
-import { Vector3 } from 'three';
+import { Vec3Util } from '../../Vec3Util';
+import { IVec3 } from '../../typing';
 import { Plane3d } from '../Geo/Plane3d';
 import { BaseAlgo3d } from './BaseAlgo3d';
 import * as nc from 'numeric';
 
 export class FittingAlgo3d extends BaseAlgo3d {
-  static fitPlane(points: Vector3[]): Plane3d {
+  static fitPlane(points: IVec3[]): Plane3d {
     // 1. 计算点集的质心
-    const centroid = new Vector3();
-    points.forEach(p => centroid.add(p));
-    centroid.divideScalar(points.length);
+    const centroid = [0, 0, 0] as IVec3;
+    points.forEach(p => Vec3Util.add(centroid, p, centroid));
+
+    const n = points.length;
+    centroid[0] /= n;
+    centroid[1] /= n;
+    centroid[2] /= n;
 
     // 2. 计算点到质心的协方差矩阵
     let cov: number[][] = [
@@ -18,18 +23,19 @@ export class FittingAlgo3d extends BaseAlgo3d {
     ];
 
     for (const p of points) {
-      const v = p.clone().sub(centroid);
-      cov[0][0] += v.x * v.x;
-      cov[0][1] += v.x * v.y;
-      cov[0][2] += v.x * v.z;
+      const v = Vec3Util.sub(p, centroid, [0, 0, 0]);
 
-      cov[1][0] += v.y * v.x;
-      cov[1][1] += v.y * v.y;
-      cov[1][2] += v.y * v.z;
+      cov[0][0] += v[0] * v[0];
+      cov[0][1] += v[0] * v[1];
+      cov[0][2] += v[0] * v[2];
 
-      cov[2][0] += v.z * v.x;
-      cov[2][1] += v.z * v.y;
-      cov[2][2] += v.z * v.z;
+      cov[1][0] += v[1] * v[0];
+      cov[1][1] += v[1] * v[1];
+      cov[1][2] += v[1] * v[2];
+
+      cov[2][0] += v[2] * v[0];
+      cov[2][1] += v[2] * v[1];
+      cov[2][2] += v[2] * v[2];
     }
 
     cov = nc.div(nc.mul(cov, 1 / points.length), 1);
@@ -47,12 +53,13 @@ export class FittingAlgo3d extends BaseAlgo3d {
       }
     }
 
-    const normal = new Vector3(eigVec[0][minValIdx], eigVec[1][minValIdx], eigVec[2][minValIdx]);
-    let distance = normal.dot(centroid);
+    const normal = [eigVec[0][minValIdx], eigVec[1][minValIdx], eigVec[2][minValIdx]] as IVec3;
+
+    let distance = Vec3Util.dot(normal, centroid);
 
     // 5. 确保法向量指向正方向
     if (distance < 0) {
-      normal.negate();
+      Vec3Util.negate(centroid, centroid);
       distance = -distance;
     }
 

@@ -1,6 +1,6 @@
 import { Curve } from './Curve';
 import { ICurveCircleData } from './2d.type';
-import { VecUtil } from '../VecUtil';
+import { Vec2Util } from '../Vec2Util';
 import { IMat3, IVec2 } from '../typing';
 
 export class Circle extends Curve {
@@ -14,7 +14,7 @@ export class Circle extends Curve {
   nearestPoint(pnt: IVec2): number {
     const center = this.center;
     const radius = this.radius;
-    const vec = VecUtil.sub(pnt, center, []);
+    const vec = Vec2Util.sub(pnt, center, []);
     const angle = Math.atan2(vec[1], vec[0]);
     const len = angle * radius;
     return len;
@@ -71,7 +71,7 @@ export class Circle extends Curve {
   }
 
   applyMatrix(matrix: IMat3): void {
-    VecUtil.applyMatrix(this.center, matrix, this.center);
+    Vec2Util.applyMatrix(this.center, matrix, this.center);
   }
 
   toJSON(): ICurveCircleData {
@@ -83,7 +83,7 @@ export class Circle extends Curve {
   }
 
   fromJSON(data: ICurveCircleData) {
-    VecUtil.copy(data.center, this.center);
+    Vec2Util.copy(data.center, this.center);
 
     this.radius = data.radius;
     return this;
@@ -93,7 +93,7 @@ export class Circle extends Curve {
     const center = this.center;
     const radius = this.radius;
 
-    const vec = VecUtil.sub(pnt, center, []);
+    const vec = Vec2Util.sub(pnt, center, []);
     const angle = Math.atan2(vec[1], vec[0]);
 
     const len = angle * radius;

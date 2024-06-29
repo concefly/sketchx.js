@@ -1,38 +1,35 @@
 import { randomID } from '../randomID';
 import { Hierarchy } from '../Hierarchy';
-import { Euler, Matrix4, Vector3 } from 'three';
 import { BaseTopo } from './Topo/BaseTopo';
+import { Mat4Util } from '../Mat4Util';
 
 export class Node3d extends Hierarchy {
   constructor(
     public primitive: BaseTopo | null = null,
-    public position = new Vector3(),
-    public rotation = new Euler(),
-    public scaling = new Vector3(1, 1)
+    public position = [0, 0, 0],
+    public rotation = [0, 0, 0],
+    public scaling = [1, 1, 1]
   ) {
     super();
   }
 
-  private __localMatrix = new Matrix4();
-  private __worldMatrix = new Matrix4();
+  private __localMatrix = Mat4Util.identity([]);
+  private __worldMatrix = Mat4Util.identity([]);
 
   id = randomID();
 
   matrix() {
-    const m = this.__localMatrix.identity();
-
-    m.makeRotationFromEuler(this.rotation);
-    m.setPosition(this.position);
-    m.scale(this.scaling);
-
+    const m = this.__localMatrix;
+    Mat4Util.compose(this.position, this.rotation, this.scaling, m);
     return m;
   }
 
   worldMatrix() {
     if (this.parent) {
-      this.__worldMatrix.multiplyMatrices(this.parent.worldMatrix(), this.matrix());
+      // this.__worldMatrix.multiplyMatrices(this.parent.worldMatrix(), this.matrix());
+      Mat4Util.multiply(this.parent.worldMatrix(), this.matrix(), this.__worldMatrix);
     } else {
-      this.__worldMatrix.copy(this.matrix());
+      Mat4Util.copy(this.matrix(), this.__worldMatrix);
     }
 
     return this.__worldMatrix;
@@ -40,11 +37,18 @@ export class Node3d extends Hierarchy {
 
   applyTransform() {
     const m = this.worldMatrix();
-    // this.primitive?.applyMatrix(m);
 
-    this.position.set(0, 0, 0);
-    this.rotation.set(0, 0, 0);
-    this.scaling.set(1, 1, 1);
+    this.position[0] = 0;
+    this.position[1] = 0;
+    this.position[2] = 0;
+
+    this.rotation[0] = 0;
+    this.rotation[1] = 0;
+    this.rotation[2] = 0;
+
+    this.scaling[0] = 1;
+    this.scaling[1] = 1;
+    this.scaling[2] = 1;
 
     return this;
   }

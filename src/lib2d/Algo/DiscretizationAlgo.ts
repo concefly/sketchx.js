@@ -1,7 +1,7 @@
 import { BaseAlgo } from './BaseAlgo';
 import { Curve } from '../Curve';
 import { IVec2 } from '../../typing';
-import { VecUtil } from '../../VecUtil';
+import { Vec2Util } from '../../Vec2Util';
 
 /** 离散化算法 */
 export class DiscretizationAlgo extends BaseAlgo {
@@ -43,17 +43,17 @@ export class DiscretizationAlgo extends BaseAlgo {
       const pm = curve.pointAt((t0 + t1) / 2, []);
 
       // 两点的中点
-      const po1m = VecUtil.center([p0, p1], []);
+      const po1m = Vec2Util.center([p0, p1], []);
 
       // 两点的向量
       // const p01t = new Vector2(p1.x, p1.y).sub(p0).normalize();
-      const p01t = VecUtil.sub(p1, p0, []);
-      VecUtil.normalize(p01t, p01t);
+      const p01t = Vec2Util.sub(p1, p0, []);
+      Vec2Util.normalize(p01t, p01t);
 
       // 弦高 + 弦角
-      const distance = VecUtil.distanceTo(pm, po1m);
+      const distance = Vec2Util.distanceTo(pm, po1m);
 
-      const angle = Math.abs(VecUtil.angle(t1t, p01t));
+      const angle = Math.abs(Vec2Util.angle(t1t, p01t));
 
       const linearDelta = distance - linearDeflection;
       const angularDelta = angle - angularDeflection;

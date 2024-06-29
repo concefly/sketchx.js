@@ -1,4 +1,3 @@
-import { Vector3 } from 'three';
 import { BaseBuilder } from './BaseBuilder';
 import { Wire3d } from '../Topo/Wire3d';
 import { Edge3d } from '../Topo/Edge3d';
@@ -6,11 +5,12 @@ import { Line3d } from '../Geo/Line3d';
 import { Face3d } from '../Topo/Face3d';
 import { Plane3d } from '../Geo/Plane3d';
 import { FittingAlgo3d } from '../Algo/FittingAlgo3d';
+import { IVec3 } from '../../typing';
 
 export class PolygonBuilder extends BaseBuilder {
   constructor(
-    public outline: Vector3[],
-    public holes: Vector3[][] = []
+    public outline: IVec3[],
+    public holes: IVec3[][] = []
   ) {
     super();
   }

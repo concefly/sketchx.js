@@ -1,6 +1,6 @@
 import { IMat3, IVec2 } from './typing';
 
-export const VecUtil = {
+export const Vec2Util = {
   isVec2(pnt: any): pnt is IVec2 {
     return pnt && typeof pnt[0] === 'number' && typeof pnt[1] === 'number';
   },
@@ -88,6 +88,12 @@ export const VecUtil = {
     const dy = pnt[1] - center[1];
     ref[0] = center[0] + dx * cos - dy * sin;
     ref[1] = center[1] + dx * sin + dy * cos;
+    return ref;
+  },
+
+  add(p0: IVec2, p1: IVec2, ref: IVec2): IVec2 {
+    ref[0] = p0[0] + p1[0];
+    ref[1] = p0[1] + p1[1];
     return ref;
   },
 };

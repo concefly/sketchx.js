@@ -4,7 +4,7 @@ import { BaseAlgo } from './BaseAlgo';
 import { Curve } from '../Curve';
 import { IntersectAlgo } from './IntersectAlgo';
 import { Arc } from '../Arc';
-import { VecUtil } from '../../VecUtil';
+import { Vec2Util } from '../../Vec2Util';
 
 /**
  * 线条扩展算法
@@ -58,7 +58,7 @@ export class LineExpanseAlgo extends BaseAlgo {
           const t0 = c0.tangentAt(c0.length, []);
           const t1 = c1.tangentAt(0, []);
 
-          const cross = VecUtil.cross(t0, t1);
+          const cross = Vec2Util.cross(t0, t1);
           const direction = cross > 0 ? 1 : cross < 0 ? -1 : 0;
 
           // 平行

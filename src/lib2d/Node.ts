@@ -4,8 +4,8 @@ import { Parser } from './Parser';
 import { Face } from './Face';
 import { randomID } from '../randomID';
 import { Hierarchy } from '../Hierarchy';
-import { VecUtil } from '../VecUtil';
-import { MatrixUtil } from '../MatrixUtil';
+import { Vec2Util } from '../Vec2Util';
+import { Mat3Util } from '../Mat3Util';
 import { IMat3, IVec2 } from '../typing';
 
 /**
@@ -26,8 +26,8 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
   id = randomID();
   userData?: D;
 
-  private __localMatrix = MatrixUtil.identify([]);
-  private __worldMatrix = MatrixUtil.identify([]);
+  private __localMatrix = Mat3Util.identify([]);
+  private __worldMatrix = Mat3Util.identify([]);
 
   /** 对齐到指定姿态，并保持 primitive 世界位姿不变 */
   alineTo(node: Node): this;
@@ -49,10 +49,10 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
 
     // 逆变换
     if (this.primitive) {
-      const mInv = MatrixUtil.identify([]);
+      const mInv = Mat3Util.identify([]);
 
-      MatrixUtil.compose(position, rotation, scaling, mInv);
-      MatrixUtil.invert(mInv, mInv);
+      Mat3Util.compose(position, rotation, scaling, mInv);
+      Mat3Util.invert(mInv, mInv);
 
       this.primitive.applyMatrix(mInv);
     }
@@ -80,8 +80,8 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
    * @returns The transformation matrix.
    */
   matrix() {
-    const m = MatrixUtil.identify(this.__localMatrix);
-    MatrixUtil.compose(this.position, this.rotation, this.scaling, m);
+    const m = Mat3Util.identify(this.__localMatrix);
+    Mat3Util.compose(this.position, this.rotation, this.scaling, m);
     return m;
   }
 
@@ -92,13 +92,13 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
    * @returns The world transformation matrix.
    */
   worldMatrix() {
-    MatrixUtil.copy(this.matrix(), this.__worldMatrix);
+    Mat3Util.copy(this.matrix(), this.__worldMatrix);
 
     const m = this.__worldMatrix;
     let node = this.parent;
 
     while (node) {
-      MatrixUtil.multiply(node.matrix(), m, m);
+      Mat3Util.multiply(node.matrix(), m, m);
       node = node.parent;
     }
 
@@ -111,29 +111,29 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
    * @param worldMatrix - The world matrix representing the new pose of the node.
    */
   setWorldPose(worldMatrix: IMat3) {
-    const parentInv = MatrixUtil.identify([]);
-    MatrixUtil.invert(this.parent?.worldMatrix() || MatrixUtil.identify([]), parentInv);
+    const parentInv = Mat3Util.identify([]);
+    Mat3Util.invert(this.parent?.worldMatrix() || Mat3Util.identify([]), parentInv);
 
-    const newLocal = MatrixUtil.multiply(parentInv, worldMatrix, []);
+    const newLocal = Mat3Util.multiply(parentInv, worldMatrix, []);
 
-    this.position = MatrixUtil.getTranslation(newLocal);
-    this.rotation = MatrixUtil.getRotation(newLocal);
-    this.scaling = MatrixUtil.getScaling(newLocal);
+    this.position = Mat3Util.getTranslation(newLocal);
+    this.rotation = Mat3Util.getRotation(newLocal);
+    this.scaling = Mat3Util.getScaling(newLocal);
   }
 
   worldToLocal(pnt: IVec2): IVec2 {
-    const m = MatrixUtil.identify([]);
-    MatrixUtil.invert(this.worldMatrix(), m);
+    const m = Mat3Util.identify([]);
+    Mat3Util.invert(this.worldMatrix(), m);
 
-    return VecUtil.applyMatrix(pnt, m, []);
+    return Vec2Util.applyMatrix(pnt, m, []);
   }
 
   worldPosition(): IVec2 {
-    return VecUtil.applyMatrix([], this.worldMatrix(), []);
+    return Vec2Util.applyMatrix([], this.worldMatrix(), []);
   }
 
   localToWorld(pnt: IVec2): IVec2 {
-    return VecUtil.applyMatrix(pnt, this.worldMatrix(), []);
+    return Vec2Util.applyMatrix(pnt, this.worldMatrix(), []);
   }
 
   clone(opt: { withParent?: boolean; noChildren?: boolean } = {}): this {
@@ -168,9 +168,9 @@ export class Node<T extends Curve | Face | null = Curve | Face | null, D = any> 
     this.id = data.id;
     this.primitive = (data.primitive ? Parser.parse(data.primitive) : null) as T;
 
-    VecUtil.copy(data.position, this.position);
+    Vec2Util.copy(data.position, this.position);
     this.rotation = data.rotation;
-    VecUtil.copy(data.scaling, this.scaling);
+    Vec2Util.copy(data.scaling, this.scaling);
 
     if (data.children) {
       this.add(data.children.map(Parser.parse) as any);

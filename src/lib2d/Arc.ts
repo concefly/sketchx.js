@@ -1,7 +1,7 @@
 import { Curve } from './Curve';
 import { ICurveArcData } from './2d.type';
 import { TMP_VEC2 } from './TmpVec';
-import { VecUtil } from '../VecUtil';
+import { Vec2Util } from '../Vec2Util';
 import { IMat3, IVec2 } from '../typing';
 
 /** 圆弧
@@ -68,7 +68,7 @@ export class Arc extends Curve {
     const { p0, p1, bulge } = this;
     if (p0[0] === p1[0] && p0[1] === p1[1]) return 0;
 
-    const distance = VecUtil.distanceTo(p0, p1);
+    const distance = Vec2Util.distanceTo(p0, p1);
 
     return Math.abs(distance / (2 * Math.sin(this.getSita() / 2)));
   }
@@ -77,7 +77,7 @@ export class Arc extends Curve {
     const center = this.getCenter(TMP_VEC2[0]);
     const radius = this.getRadius();
 
-    const vec = VecUtil.sub(pnt, center, []);
+    const vec = Vec2Util.sub(pnt, center, []);
     const angle = Math.atan2(vec[1], vec[0]);
 
     const angle0 = this.angleAt(0);
@@ -137,8 +137,8 @@ export class Arc extends Curve {
   }
 
   applyMatrix(matrix: IMat3): void {
-    VecUtil.applyMatrix(this.p0, matrix, this.p0);
-    VecUtil.applyMatrix(this.p1, matrix, this.p1);
+    Vec2Util.applyMatrix(this.p0, matrix, this.p0);
+    Vec2Util.applyMatrix(this.p1, matrix, this.p1);
   }
 
   toJSON(): ICurveArcData {
@@ -151,8 +151,8 @@ export class Arc extends Curve {
   }
 
   fromJSON(data: ICurveArcData): this {
-    VecUtil.copy(data.p0, this.p0);
-    VecUtil.copy(data.p1, this.p1);
+    Vec2Util.copy(data.p0, this.p0);
+    Vec2Util.copy(data.p1, this.p1);
 
     this.bulge = data.bulge;
     return this;
@@ -176,9 +176,9 @@ export class Arc extends Curve {
     const center = this.getCenter(TMP_VEC2[0]);
     const radius = this.getRadius();
 
-    if (Math.abs(VecUtil.distanceTo(pnt, center) - radius) > 1e-6) return null;
+    if (Math.abs(Vec2Util.distanceTo(pnt, center) - radius) > 1e-6) return null;
 
-    const vec = VecUtil.sub(pnt, center, []);
+    const vec = Vec2Util.sub(pnt, center, []);
     const angle = Math.atan2(vec[1], vec[0]);
 
     const angle0 = this.angleAt(0);

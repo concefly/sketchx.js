@@ -5,7 +5,7 @@ import { IMat3, IVec2 } from './typing';
  *
  * - IMat3 是一个 3x3 的矩阵，它的排列方式是列优先的。
  */
-export const MatrixUtil = {
+export const Mat3Util = {
   copy(m: IMat3, ref: IMat3) {
     ref[0] = m[0];
     ref[1] = m[1];

@@ -14,7 +14,6 @@ import {
 import { ICompound3dData, ICurve3dData, IEdge3dData, IFace3dData, ISolid3dData, ISurface3dData, IWire3dData } from '../3d.type';
 import { Curve3d } from '../Geo/Curve3d';
 import { Line3d } from '../Geo/Line3d';
-import { Vector3 } from 'three';
 import { Edge3d } from '../Topo/Edge3d';
 import { Wire3d } from '../Topo/Wire3d';
 import { Face3d } from '../Topo/Face3d';

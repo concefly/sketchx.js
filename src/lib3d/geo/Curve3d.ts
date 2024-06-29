@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { IVec3 } from '../../typing';
 import { ICurve3dData } from '../3d.type';
 
 export abstract class Curve3d {
@@ -7,5 +7,5 @@ export abstract class Curve3d {
   abstract clone(): Curve3d;
   abstract toJSON(): ICurve3dData;
 
-  abstract isPointOnCurve(point: Vector3): boolean;
+  abstract isPointOnCurve(point: IVec3): boolean;
 }

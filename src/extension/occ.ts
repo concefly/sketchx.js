@@ -13,7 +13,7 @@ import ocFullJS, {
   TopoDS_Wire,
 } from 'opencascade.js/dist/opencascade.full.js';
 import { DefaultLogger } from '../Logger';
-import { Euler, Object3D, Quaternion, Vector2, Vector3 } from 'three';
+import { Vec3Util } from '../Vec3Util';
 
 export type {
   BRepAlgoAPI_BooleanOperation,
@@ -299,19 +299,29 @@ function pickPointsFromEdge(edge: TopoDS_Shape, countIfCurve: number = 128): num
 function _isPointsCollinear(points: number[][], tol = 1e-6) {
   if (points.length < 3) return true;
 
-  const v0 = new Vector3().fromArray(points[0]);
-  const v1 = new Vector3().fromArray(points[1]);
-  const vecBase = new Vector3().subVectors(v1, v0).normalize();
+  // const v0 = new Vector3().fromArray(points[0]);
+  // const v1 = new Vector3().fromArray(points[1]);
+  // const vecBase = new Vector3().subVectors(v1, v0).normalize();
 
-  const vp = new Vector3();
+  const v0 = [0, 0, 0];
+  const v1 = [0, 0, 0];
+
+  Vec3Util.copy(points[1], v0);
+  Vec3Util.copy(points[2], v1);
+
+  const vecBase = Vec3Util.sub(v1, v0, []);
+  Vec3Util.normalize(vecBase, vecBase);
+
+  const vp = [0, 0, 0];
 
   for (let i = 1; i < points.length - 1; i++) {
-    v0.fromArray(points[i]);
-    v1.fromArray(points[i + 1]);
-    vp.subVectors(v1, v0).normalize();
+    Vec3Util.copy(points[i], v0);
+    Vec3Util.copy(points[i + 1], v1);
+
+    Vec3Util.sub(v1, v0, vp);
 
     // 检查叉积的大小是否在容差范围内
-    const cross = vp.cross(vecBase).length();
+    const cross = Vec3Util.length(Vec3Util.cross(vp, vecBase, []));
     if (cross > tol) return false;
   }
 

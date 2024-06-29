@@ -1,4 +1,4 @@
-import { VecUtil } from '../../VecUtil';
+import { Vec2Util } from '../../Vec2Util';
 import { IVec2 } from '../../typing';
 import { Curve } from '../Curve';
 import { Line } from '../Line';
@@ -38,12 +38,12 @@ export class IntersectAlgo extends BaseAlgo {
       const { p0, p1 } = c1;
       const list: [len0: number, len1: number][] = [];
 
-      const v1 = VecUtil.sub(c0.p1, c0.p0, []);
-      const v2 = VecUtil.sub(p1, p0, []);
-      const v3 = VecUtil.sub(p0, c0.p0, []);
+      const v1 = Vec2Util.sub(c0.p1, c0.p0, []);
+      const v2 = Vec2Util.sub(p1, p0, []);
+      const v3 = Vec2Util.sub(p0, c0.p0, []);
 
-      const t = VecUtil.cross(v3, v2) / VecUtil.cross(v1, v2);
-      const s = VecUtil.cross(v3, v1) / VecUtil.cross(v1, v2);
+      const t = Vec2Util.cross(v3, v2) / Vec2Util.cross(v1, v2);
+      const s = Vec2Util.cross(v3, v1) / Vec2Util.cross(v1, v2);
 
       if (t >= 0 && t <= 1 && s >= 0 && s <= 1) {
         const len0 = c0.length * t;

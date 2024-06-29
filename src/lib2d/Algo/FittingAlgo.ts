@@ -7,7 +7,7 @@ import { ICurveData } from '../2d.type';
 import { Arc } from '../Arc';
 import { Curve } from '../Curve';
 import { IVec2 } from '../../typing';
-import { VecUtil } from '../../VecUtil';
+import { Vec2Util } from '../../Vec2Util';
 
 const RuleList: { target: ICurveData['type']; minPntCnt: number }[] = [
   { target: 'line', minPntCnt: 3 },
@@ -123,13 +123,13 @@ export class FittingAlgo extends BaseAlgo {
     // 判断正逆时针
     const curveMinPnt = pnts[pnts.length >> 1];
 
-    const v0 = VecUtil.sub(end, start, []);
-    VecUtil.normalize(v0, v0);
+    const v0 = Vec2Util.sub(end, start, []);
+    Vec2Util.normalize(v0, v0);
 
-    const v1 = VecUtil.sub(curveMinPnt, start, []);
-    VecUtil.normalize(v1, v1);
+    const v1 = Vec2Util.sub(curveMinPnt, start, []);
+    Vec2Util.normalize(v1, v1);
 
-    const cross = VecUtil.cross(v0, v1);
+    const cross = Vec2Util.cross(v0, v1);
 
     if (cross > 0) bulge *= -1;
 
@@ -155,13 +155,13 @@ export class FittingAlgo extends BaseAlgo {
       const p1 = pnts[i];
       const p2 = pnts[i + 1];
 
-      VecUtil.sub(p1, p0, v0);
-      VecUtil.sub(p2, p1, v1);
+      Vec2Util.sub(p1, p0, v0);
+      Vec2Util.sub(p2, p1, v1);
 
-      VecUtil.normalize(v0, v0);
-      VecUtil.normalize(v1, v1);
+      Vec2Util.normalize(v0, v0);
+      Vec2Util.normalize(v1, v1);
 
-      const angle = Math.acos(VecUtil.dot(v0, v1));
+      const angle = Math.acos(Vec2Util.dot(v0, v1));
 
       if (angle > tolerance) {
         seg.push(p1);
@@ -228,16 +228,16 @@ function calcVariance(pnts: IVec2[], curve: Curve) {
   let variance = 0;
 
   // 逐点计算距离
-  variance += VecUtil.distanceTo(pnts[0], curve.pointAt(0, pntOnCurve)) ** 2;
+  variance += Vec2Util.distanceTo(pnts[0], curve.pointAt(0, pntOnCurve)) ** 2;
 
   for (let i = 1; i < pnts.length; i++) {
     const p0 = pnts[i - 1];
     const pt = pnts[i];
 
-    lenSum += VecUtil.distanceTo(p0, pt);
+    lenSum += Vec2Util.distanceTo(p0, pt);
 
     curve.pointAt(lenSum, pntOnCurve);
-    const dis = VecUtil.distanceTo(pt, pntOnCurve);
+    const dis = Vec2Util.distanceTo(pt, pntOnCurve);
 
     variance += dis ** 2;
   }

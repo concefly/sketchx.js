@@ -1,4 +1,4 @@
-import { MatrixUtil } from '../../src/MatrixUtil';
+import { Mat3Util } from '../../src/Mat3Util';
 import { Line } from '../../src/lib2d/Line';
 
 describe('Line', () => {
@@ -88,8 +88,8 @@ describe('Line', () => {
   it('applyMatrix', () => {
     const line = new Line([0, 0], [1, 0]);
 
-    const mat = MatrixUtil.identify([]);
-    MatrixUtil.makeRotation(Math.PI / 2, mat);
+    const mat = Mat3Util.identify([]);
+    Mat3Util.makeRotation(Math.PI / 2, mat);
 
     line.applyMatrix(mat);
 

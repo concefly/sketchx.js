@@ -3,7 +3,7 @@ import { ICurveData, ICurveWireData } from './2d.type';
 import { Parser } from './Parser';
 import { Line } from './Line';
 import { TMP_VEC2 } from './TmpVec';
-import { VecUtil } from '../VecUtil';
+import { Vec2Util } from '../Vec2Util';
 import { IMat3, IVec2 } from '../typing';
 
 /**
@@ -41,7 +41,7 @@ export class Wire extends Curve {
   }
 
   get geoCenter(): IVec2 {
-    return VecUtil.center(
+    return Vec2Util.center(
       this.curves.map(c => c.geoCenter),
       []
     );
@@ -56,7 +56,7 @@ export class Wire extends Curve {
     const pTail = cEnd.pointAt(cEnd.length, []);
     const pHead = cStart.pointAt(0, []);
 
-    return VecUtil.equals(pTail, pHead);
+    return Vec2Util.equals(pTail, pHead);
   }
 
   close() {
@@ -68,7 +68,7 @@ export class Wire extends Curve {
     const pTail = cEnd.pointAt(cEnd.length, []);
     const pHead = cStart.pointAt(0, []);
 
-    if (!VecUtil.equals(pTail, pHead)) {
+    if (!Vec2Util.equals(pTail, pHead)) {
       const line = new Line(pTail, pHead);
       this.curves.push(line);
     }
@@ -152,7 +152,7 @@ export class Wire extends Curve {
       const p0 = [...points[points.length - 1]];
       const p1 = [...points[0]];
 
-      if (!VecUtil.equals(p0, p1)) {
+      if (!Vec2Util.equals(p0, p1)) {
         const line = new Line(p0, p1);
         this.curves.push(line);
       }
